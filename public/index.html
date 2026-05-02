@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escucha AMPM Managua — Álbum Panini · Managua</title>
+<meta name="description" content="Sistema de retroalimentación para Gerentes de Tienda AMPM Nicaragua">
+<link rel="icon" type="image/jpeg" href="/ampm-logo.jpg">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface-alt: #F0EEE9;
+    --border: #E2DED7;
+    --border-strong: #C8C3BB;
+    --text-primary: #1A1917;
+    --text-secondary: #6B6760;
+    --text-hint: #9E9A95;
+    --blue: #1B3A6B;
+    --blue-hover: #142d58;
+    --blue-light: #EEF2FF;
+    --blue-mid: #C7D3F8;
+    --orange: #E07B1A;
+    --orange-dark: #C46A10;
+    --orange-light: #FEF3E2;
+    --orange-mid: #F5C07A;
+    --green: #166534;
+    --green-light: #DCFCE7;
+    --green-mid: #86EFAC;
+    --amber: #92400E;
+    --amber-light: #FEF3C7;
+    --amber-mid: #FCD34D;
+    --red: #991B1B;
+    --red-light: #FEE2E2;
+    --red-mid: #FECACA;
+    --purple: #5B21B6;
+    --purple-light: #F3E8FF;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; font-size: 14px; line-height: 1.6; }
+
+  /* HEADER */
+  .header { background: var(--blue); color: #fff; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-logo { height: 32px; border-radius: 4px; }
+  .header-title { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+  .header-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-left: 4px; font-weight: 300; }
+  .header-badge { font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.75); padding: 3px 10px; border-radius: 20px; letter-spacing: 0.04em; }
+
+  /* CONTAINER */
+  .container { max-width: 720px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+
+  /* ROLE SCREEN */
+  .role-screen { min-height: calc(100vh - 56px); display: flex; align-items: center; justify-content: center; }
+  .role-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); width: 100%; max-width: 420px; text-align: center; }
+  .role-box-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .role-box-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.75rem; }
+  .role-btns { display: flex; gap: 10px; }
+  .role-btn { flex: 1; padding: 20px 12px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .role-btn:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .role-btn-icon { font-size: 28px; }
+  .role-btn-label { font-size: 13px; font-weight: 600; }
+  .role-btn.admin { border-color: rgba(27,58,107,0.3); background: var(--blue-light); }
+  .role-btn.admin:hover { border-color: var(--blue); }
+  .role-btn.gt { border-color: var(--orange-mid); background: var(--orange-light); }
+  .role-btn.gt:hover { border-color: var(--orange); }
+
+  /* CARDS & FORMS */
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 12px; font-family: 'DM Mono', monospace; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-primary); background: var(--surface); transition: border-color .15s, box-shadow .15s; outline: none; }
+  .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(27,58,107,0.1); }
+  .form-select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-primary); background: var(--surface); appearance: none; cursor: pointer; outline: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%236B6760' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .form-select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(27,58,107,0.1); }
+  .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-primary); background: var(--surface); resize: none; height: 72px; transition: border-color .15s, box-shadow .15s; outline: none; line-height: 1.55; }
+  .form-textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(27,58,107,0.1); }
+  .char-count { font-size: 11px; color: var(--text-hint); text-align: right; margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .char-count.warn { color: var(--amber); }
+
+  /* BUTTONS */
+  button { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: var(--radius); padding: 8px 16px; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+  button:hover { background: var(--surface-alt); border-color: var(--border-strong); }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-primary:hover { background: var(--blue-hover); border-color: var(--blue-hover); }
+  .btn-orange { background: var(--orange); color: #fff; border-color: var(--orange); }
+  .btn-orange:hover { background: var(--orange-dark); border-color: var(--orange-dark); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--text-secondary); font-size: 12px; padding: 6px 10px; }
+  .btn-ghost:hover { background: var(--surface-alt); border-color: var(--border); color: var(--text-primary); }
+  .btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
+  .btn-danger:hover { background: #7F1D1D; }
+  .btn-dl { font-size: 12px; padding: 6px 11px; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); border-radius: var(--radius); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all .15s; }
+  .btn-dl:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+
+  /* BANNERS */
+  .banner { border-radius: var(--radius); padding: 12px 16px; font-size: 13px; font-weight: 500; margin-top: 12px; display: flex; align-items: flex-start; gap: 10px; }
+  .banner-success { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
+  .banner-fail { background: var(--red-light); color: var(--red); border: 1px solid var(--red-mid); }
+  .banner-info { background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-mid); }
+  .banner-warn { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-mid); }
+
+  /* QUESTION BOX */
+  .question-box { background: var(--blue); color: #fff; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 16px; position: relative; overflow: hidden; }
+  .question-box::before { content: '\201C'; position: absolute; top: -10px; left: 12px; font-size: 80px; font-weight: 700; color: rgba(255,255,255,0.06); font-family: Georgia, serif; line-height: 1; }
+  .question-box-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+  .question-box-text { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.92); font-weight: 400; position: relative; z-index: 1; }
+
+  /* STATS */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; box-shadow: var(--shadow); }
+  .stat-value { font-size: 28px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text-primary); letter-spacing: -0.02em; line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .progress-wrap { margin: 8px 0; }
+  .progress-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 6px; background: var(--surface-alt); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--orange); border-radius: 99px; transition: width .4s ease; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: var(--surface-alt); border-radius: var(--radius); padding: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { flex: 1; text-align: center; padding: 7px 6px; font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer; border: none; background: transparent; color: var(--text-secondary); transition: all .15s; font-family: 'DM Sans', sans-serif; min-width: 80px; }
+  .tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
+
+  /* WORD CLOUD */
+  .wordcloud-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); min-height: 260px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .chip-cloud { display: flex; flex-wrap: wrap; gap: 8px; padding: 1rem 0; min-height: 200px; align-content: center; justify-content: center; width: 100%; }
+  .chip { display: inline-block; border-radius: 99px; font-weight: 600; border: 1px solid transparent; white-space: nowrap; cursor: default; transition: transform .15s; }
+  .chip:hover { transform: scale(1.06); }
+
+  /* RESPONSES */
+  .response-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; }
+  .response-store { font-size: 11px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--blue); background: var(--blue-light); border: 1px solid var(--blue-mid); border-radius: 6px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .response-text { font-size: 13px; color: var(--text-primary); }
+  .response-time { font-size: 11px; color: var(--text-hint); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+  /* DASHBOARD / INSIGHTS */
+  .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); }
+  .insight-title { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-hint); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+  .insight-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .insight-bar-label { font-size: 12px; color: var(--text-primary); min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .insight-bar-track { flex: 1; height: 8px; background: var(--surface-alt); border-radius: 99px; overflow: hidden; }
+  .insight-bar-fill { height: 100%; border-radius: 99px; transition: width .3s ease; }
+  .insight-bar-count { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-hint); min-width: 20px; text-align: right; }
+  .cluster-tag { display: inline-block; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 99px; margin: 3px 4px 3px 0; }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+  .modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 1.75rem; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.25rem; }
+
+  /* PDF BAR */
+  .pdf-bar { display: flex; align-items: center; justify-content: space-between; background: var(--blue-light); border: 1px solid var(--blue-mid); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+  .pdf-bar-label { font-size: 12px; color: var(--blue); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+
+  /* EDIT AREA */
+  .edit-area { background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 12px; }
+
+  /* SUCCESS */
+  .success-screen { text-align: center; padding: 2rem 1rem; }
+  .success-icon { font-size: 48px; margin-bottom: 12px; }
+  .success-title { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; }
+
+  /* MISC */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .mt-1 { margin-top: 8px; } .mt-2 { margin-top: 16px; } .mt-3 { margin-top: 24px; } .mb-1 { margin-bottom: 8px; }
+  .hidden { display: none !important; }
+  .back-link { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); cursor: pointer; margin-bottom: 1.5rem; }
+  .back-link:hover { color: var(--text-primary); }
+  .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .fade-in { animation: fadeUp .25s ease both; }
+
+  @media (max-width: 480px) {
+    .stat-row { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .stat-value { font-size: 22px; }
+    .insight-grid { grid-template-columns: 1fr; }
+    .tabs { gap: 2px; }
+    .tab { font-size: 11px; padding: 6px 4px; }
+    .header { padding: 0 1rem; }
+    .container { padding: 1rem 0.75rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <img src="/ampm-logo.jpg" alt="AMPM" class="header-logo">
+    <span class="header-title">Escucha AMPM Managua</span>
+    <span class="header-sub">Álbum Panini · Managua</span>
+  </div>
+  <span class="header-badge" id="header-role-badge">v2.0</span>
+</header>
+
+<!-- ADMIN PASSWORD MODAL -->
+<div class="modal-overlay hidden" id="admin-modal">
+  <div class="modal-box fade-in">
+    <div class="modal-title">&#x1F510; Acceso Admin</div>
+    <div class="modal-sub">Ingresa la clave de administrador para continuar.</div>
+    <div class="form-group">
+      <label class="form-label">Clave de acceso</label>
+      <input type="password" class="form-input" id="admin-pass-input" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') submitAdminPass()"
+        style="font-family:'DM Mono',monospace;letter-spacing:0.1em">
+    </div>
+    <div id="admin-pass-error" class="hidden" style="color:var(--red);font-size:12px;margin-bottom:10px">
+      &#x2715; Clave incorrecta. Intenta de nuevo.
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-orange" onclick="submitAdminPass()" style="flex:1">Entrar</button>
+      <button class="btn-ghost" onclick="cancelAdminModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE QUESTION MODAL -->
+<div class="modal-overlay hidden" id="changeq-modal">
+  <div class="modal-box fade-in">
+    <div class="modal-title">&#x26A0;&#xFE0F; Cambiar pregunta</div>
+    <div class="modal-sub">Antes de continuar, ¿deseas descargar el PDF con la pregunta actual y todas las respuestas?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn-orange" onclick="downloadPDFthenChange()" style="justify-content:center">
+        &#x1F4E5; Descargar PDF y cambiar pregunta
+      </button>
+      <button class="btn-danger" onclick="confirmChangeQuestion()" style="justify-content:center">Cambiar sin descargar</button>
+      <button class="btn-ghost" onclick="cancelChangeQ()" style="justify-content:center">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ROLE SELECTOR -->
+  <div id="screen-role" class="role-screen">
+    <div class="role-box fade-in">
+      <img src="/ampm-logo.jpg" alt="AMPM" style="height:48px;margin-bottom:16px;border-radius:6px">
+      <div class="role-box-title">Escucha AMPM Managua</div>
+      <div class="role-box-sub">Álbum Panini · Managua — Selecciona tu rol</div>
+      <div class="role-btns">
+        <button class="role-btn admin" onclick="selectRole('admin')">
+          <div class="role-btn-icon">&#x1F510;</div>
+          <div class="role-btn-label">Admin</div>
+        </button>
+        <button class="role-btn gt" onclick="selectRole('gt')">
+          <div class="role-btn-icon">&#x1F3EA;</div>
+          <div class="role-btn-label">Gerente de Tienda</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GT SCREEN -->
+  <div id="screen-gt" class="hidden fade-in">
+    <div class="back-link" onclick="goHome()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Cambiar rol
+    </div>
+
+    <div id="gt-form-view">
+      <div class="section-label">Tu tienda</div>
+      <div class="card mb-1">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Selecciona tu tienda AMPM</label>
+          <select class="form-select" id="gt-store-select" onchange="checkGTAlreadyAnswered()">
+            <option value="">— Elige tu tienda —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-2 section-label">Pregunta activa</div>
+      <div class="question-box">
+        <div class="question-box-label">Álbum Panini · Managua</div>
+        <div class="question-box-text" id="gt-question-text">Cargando pregunta...</div>
+      </div>
+
+      <div class="card">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Tu respuesta — máximo 180 caracteres</label>
+          <textarea class="form-textarea" id="gt-response-input"
+            placeholder="Escribe tu respuesta aquí en pocas palabras..."
+            maxlength="180"
+            oninput="updateCharCount(this)"></textarea>
+          <div class="char-count" id="gt-char-count">0 / 180</div>
+        </div>
+      </div>
+
+      <div id="gt-already-answered" class="banner banner-warn hidden">
+        <span>&#x26A0;</span>
+        <span>Esta tienda ya envió su respuesta para esta encuesta. ¡Gracias!</span>
+      </div>
+
+      <div class="mt-2">
+        <button class="btn-orange" id="btn-gt-submit" onclick="submitGTResponse()">
+          &#x27A1;&#xFE0F; Enviar respuesta
+        </button>
+      </div>
+    </div>
+
+    <div id="gt-success-view" class="hidden">
+      <div class="success-screen">
+        <div class="success-icon">&#x2705;</div>
+        <div class="success-title" style="color:var(--green)">¡Respuesta enviada!</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;max-width:340px;margin-left:auto;margin-right:auto">
+          Tu opinión fue registrada. Gracias por contribuir con la visión de AMPM Nicaragua.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN SCREEN -->
+  <div id="screen-admin" class="hidden fade-in">
+    <div class="back-link" onclick="goHome()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Salir
+    </div>
+
+    <!-- PDF BAR -->
+    <div class="pdf-bar">
+      <div class="pdf-bar-label">
+        &#x1F4CA; Resumen completo — pregunta + nube + respuestas
+      </div>
+      <button class="btn-orange" onclick="downloadPDF()" style="font-size:12px;padding:6px 13px">
+        &#x1F4E5; Descargar PDF
+      </button>
+    </div>
+
+    <!-- STATS -->
+    <div class="section-label">Resumen de respuestas</div>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Respuestas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-stores">—</div>
+        <div class="stat-label">Tiendas activas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-pct">—</div>
+        <div class="stat-label">Participación</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap mb-1">
+      <div class="progress-label">
+        <span>Progreso de respuestas</span>
+        <span id="admin-pct-label">…</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="admin-progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs mt-2">
+      <button class="tab active" id="tab-dashboard" onclick="switchTab('dashboard')">&#x1F4CA; Dashboard</button>
+      <button class="tab" id="tab-cloud" onclick="switchTab('cloud')">&#x2601;&#xFE0F; Nube</button>
+      <button class="tab" id="tab-list" onclick="switchTab('list')">&#x1F4CB; Respuestas</button>
+      <button class="tab" id="tab-config" onclick="switchTab('config')">&#x2699;&#xFE0F; Pregunta</button>
+    </div>
+
+    <!-- TAB: DASHBOARD -->
+    <div id="admin-tab-dashboard">
+      <div class="section-label">Análisis de sentimiento y patrones</div>
+      <div class="insight-grid">
+        <div class="insight-card" style="grid-column: 1 / -1">
+          <div class="insight-title">&#x1F4AC; Clusters de respuestas similares</div>
+          <div id="dash-clusters"><span style="color:var(--text-hint);font-size:12px">Analizando...</span></div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">&#x1F7E2; Sentimiento general</div>
+          <div id="dash-sentiment"><span style="color:var(--text-hint);font-size:12px">—</span></div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">&#x1F4CF; Largo promedio</div>
+          <div id="dash-avg-length"><span style="color:var(--text-hint);font-size:12px">—</span></div>
+        </div>
+      </div>
+      <div class="insight-grid">
+        <div class="insight-card" style="grid-column: 1 / -1">
+          <div class="insight-title">&#x1F4CA; Top palabras clave</div>
+          <div id="dash-top-words"></div>
+        </div>
+      </div>
+      <div class="insight-grid">
+        <div class="insight-card" style="grid-column: 1 / -1">
+          <div class="insight-title">&#x1F6D2; Tiendas sin responder</div>
+          <div id="dash-missing-stores" style="max-height:200px;overflow-y:auto"><span style="color:var(--text-hint);font-size:12px">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: WORD CLOUD -->
+    <div id="admin-tab-cloud" class="hidden">
+      <div class="toolbar">
+        <div class="section-label" style="margin-bottom:0">Palabras más frecuentes</div>
+        <button class="btn-dl" onclick="downloadCloudImage()">
+          &#x1F4E5; Descargar imagen
+        </button>
+      </div>
+      <div class="wordcloud-container" id="wc-container">
+        <div id="wc-empty">
+          <div style="text-align:center;color:var(--text-hint);font-size:13px;padding:2rem">
+            <div style="font-size:36px;margin-bottom:10px">&#x1F4AC;</div>
+            <div>Aún no hay respuestas para mostrar</div>
+          </div>
+        </div>
+        <div class="chip-cloud hidden" id="chip-cloud"></div>
+      </div>
+    </div>
+
+    <!-- TAB: RESPONSES LIST -->
+    <div id="admin-tab-list" class="hidden">
+      <div class="toolbar">
+        <div class="section-label" style="margin-bottom:0">Respuestas recibidas</div>
+        <button class="btn-dl" onclick="downloadCSV()">
+          &#x1F4E5; Descargar CSV
+        </button>
+      </div>
+      <div id="responses-list">
+        <div class="banner banner-info"><span>&#x2139;</span><span>No hay respuestas registradas aún.</span></div>
+      </div>
+    </div>
+
+    <!-- TAB: CONFIG -->
+    <div id="admin-tab-config" class="hidden">
+      <div class="section-label">Pregunta activa</div>
+      <div class="question-box">
+        <div class="question-box-label">Pregunta actual</div>
+        <div class="question-box-text" id="admin-question-display-text">Cargando...</div>
+      </div>
+      <div class="edit-area mt-2">
+        <div class="section-label" style="margin-bottom:10px">Editar pregunta</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <textarea class="form-textarea" id="admin-question-edit" style="height:100px" placeholder="Escribe aquí la nueva pregunta..."></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="askChangeQuestion()">
+            &#x2705; Guardar nueva pregunta
+          </button>
+        </div>
+        <div class="banner banner-warn mt-1" style="font-size:12px;padding:8px 12px">
+          <span>&#x26A0;</span>
+          <span>Cambiar la pregunta creará una nueva encuesta. Las respuestas anteriores se conservan en la base de datos.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// SUPABASE INIT
+// ═══════════════════════════════════════════
+const SUPABASE_URL = 'https://rptnavgcyiyktftbjtmf.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwdG5hdmdjeWl5a3RmdGJqdG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NDQ5NjksImV4cCI6MjA5MzIyMDk2OX0.L8jsCaX6RlAboXwqul6QUnLuYoJHmH8b24Fl_g6u_qk';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const ADMIN_PASS = 'AMPM24/7';
+const SISTEMA = 'managua';
+let tiendas = [];
+let totalStores = 0;
+let encuestaActiva = null;
+let respuestas = [];
+let currentTab = 'dashboard';
+let pendingNewQ = '';
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+async function init() {
+  // Load tiendas
+  const { data: t } = await sb.from('tiendas').select('*').order('orden');
+  tiendas = t || [];
+  totalStores = tiendas.length;
+
+  // Populate GT store select
+  const sel = document.getElementById('gt-store-select');
+  tiendas.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.codigo;
+    o.textContent = s.codigo + ' - ' + s.nombre;
+    sel.appendChild(o);
+  });
+}
+init();
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
+async function loadEncuestaActiva() {
+  const { data } = await sb.from('encuestas').select('*').eq('activa', true).eq('sistema', 'managua').limit(1).single();
+  encuestaActiva = data;
+  return data;
+}
+
+async function loadRespuestas() {
+  if (!encuestaActiva) return [];
+  const { data } = await sb.from('respuestas')
+    .select('*, tiendas(nombre)')
+    .eq('encuesta_id', encuestaActiva.id)
+    .order('created_at', { ascending: false });
+  respuestas = data || [];
+  return respuestas;
+}
+
+// ═══════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════
+function showScreen(n) {
+  ['role','gt','admin'].forEach(s => document.getElementById('screen-'+s).classList.add('hidden'));
+  document.getElementById('screen-'+n).classList.remove('hidden');
+}
+function goHome() { showScreen('role'); document.getElementById('header-role-badge').textContent='v2.0'; }
+
+// ═══════════════════════════════════════════
+// ROLE SELECTION
+// ═══════════════════════════════════════════
+async function selectRole(role) {
+  if (role === 'admin') {
+    document.getElementById('admin-modal').classList.remove('hidden');
+    document.getElementById('admin-pass-input').value = '';
+    document.getElementById('admin-pass-error').classList.add('hidden');
+    setTimeout(() => document.getElementById('admin-pass-input').focus(), 100);
+  } else {
+    showScreen('gt');
+    document.getElementById('header-role-badge').textContent = 'GT';
+    await loadEncuestaActiva();
+    if (encuestaActiva) {
+      document.getElementById('gt-question-text').textContent = encuestaActiva.pregunta;
+    }
+    document.getElementById('gt-store-select').value = '';
+    document.getElementById('gt-response-input').value = '';
+    document.getElementById('gt-char-count').textContent = '0 / 180';
+    document.getElementById('gt-already-answered').classList.add('hidden');
+    document.getElementById('btn-gt-submit').disabled = false;
+    document.getElementById('gt-form-view').classList.remove('hidden');
+    document.getElementById('gt-success-view').classList.add('hidden');
+  }
+}
+
+function submitAdminPass() {
+  if (document.getElementById('admin-pass-input').value === ADMIN_PASS) {
+    document.getElementById('admin-modal').classList.add('hidden');
+    showScreen('admin');
+    document.getElementById('header-role-badge').textContent = 'ADMIN';
+    renderAdmin();
+  } else {
+    document.getElementById('admin-pass-error').classList.remove('hidden');
+    document.getElementById('admin-pass-input').value = '';
+    document.getElementById('admin-pass-input').focus();
+  }
+}
+function cancelAdminModal() { document.getElementById('admin-modal').classList.add('hidden'); }
+
+// ═══════════════════════════════════════════
+// GT FLOW
+// ═══════════════════════════════════════════
+function updateCharCount(el) {
+  const l = el.value.length;
+  const cc = document.getElementById('gt-char-count');
+  cc.textContent = l + ' / 180';
+  cc.className = 'char-count' + (l > 150 ? ' warn' : '');
+}
+
+async function checkGTAlreadyAnswered() {
+  const codigo = document.getElementById('gt-store-select').value;
+  if (!codigo || !encuestaActiva) return;
+  const { data } = await sb.from('respuestas')
+    .select('id')
+    .eq('encuesta_id', encuestaActiva.id)
+    .eq('tienda_codigo', codigo)
+    .limit(1);
+  const already = data && data.length > 0;
+  document.getElementById('gt-already-answered').classList.toggle('hidden', !already);
+  document.getElementById('btn-gt-submit').disabled = already;
+}
+
+async function submitGTResponse() {
+  const codigo = document.getElementById('gt-store-select').value;
+  const text = document.getElementById('gt-response-input').value.trim();
+  if (!codigo) { alert('Por favor selecciona tu tienda.'); return; }
+  if (!text) { alert('Por favor escribe tu respuesta.'); return; }
+  if (!encuestaActiva) { alert('No hay encuesta activa.'); return; }
+
+  const btn = document.getElementById('btn-gt-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span> Enviando...';
+
+  const { error } = await sb.from('respuestas').insert({
+    encuesta_id: encuestaActiva.id,
+    tienda_codigo: codigo,
+    texto: text
+  });
+
+  if (error) {
+    if (error.code === '23505') {
+      alert('Esta tienda ya envió su respuesta para esta encuesta.');
+    } else {
+      alert('Error al enviar: ' + error.message);
+    }
+    btn.disabled = false;
+    btn.innerHTML = '&#x27A1;&#xFE0F; Enviar respuesta';
+    return;
+  }
+
+  document.getElementById('gt-form-view').classList.add('hidden');
+  document.getElementById('gt-success-view').classList.remove('hidden');
+}
+
+function resetGT() {
+  document.getElementById('gt-form-view').classList.remove('hidden');
+  document.getElementById('gt-success-view').classList.add('hidden');
+  document.getElementById('gt-store-select').value = '';
+  document.getElementById('gt-response-input').value = '';
+  document.getElementById('gt-char-count').textContent = '0 / 180';
+  document.getElementById('gt-already-answered').classList.add('hidden');
+  document.getElementById('btn-gt-submit').disabled = false;
+  document.getElementById('btn-gt-submit').innerHTML = '&#x27A1;&#xFE0F; Enviar respuesta';
+}
+
+// ═══════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════
+async function renderAdmin() {
+  await loadEncuestaActiva();
+  await loadRespuestas();
+
+  const total = respuestas.length;
+  const pct = totalStores > 0 ? Math.round((total / totalStores) * 100) : 0;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-stores').textContent = totalStores;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('admin-pct-label').textContent = total + ' de ' + totalStores;
+  document.getElementById('admin-progress-fill').style.width = Math.min(pct, 100) + '%';
+
+  if (encuestaActiva) {
+    document.getElementById('admin-question-display-text').textContent = encuestaActiva.pregunta;
+    document.getElementById('admin-question-edit').value = encuestaActiva.pregunta;
+  }
+
+  renderDashboard();
+  renderWordCloud();
+  renderResponsesList();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  ['dashboard','cloud','list','config'].forEach(t => {
+    document.getElementById('admin-tab-'+t).classList.toggle('hidden', t!==tab);
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+}
+
+// ═══════════════════════════════════════════
+// WORD CLOUD
+// ═══════════════════════════════════════════
+const STOPS = new Set(['y','o','a','de','del','la','el','los','las','en','que','con','se','al','un','una','es','por','para','no','me','su','te','mi','lo','más','muy','pero','si','ya','hay','les','le','fue','han','son','sus','esta','este','esto','están','tienen','también','como','cuando','todo','todos','sobre','mismo','bien','qué','cómo','cuándo','dónde','trata','pocas','palabras','da','sin','ni','era','ser','había','así','tal','tan','solo','sólo','ante','poco','mucho','muchos','nada','cada','pues','acá','acaba','aún','darse','cuenta','nos','hay','han']);
+const WC_COLORS = ['#1B3A6B','#E07B1A','#166534','#991B1B','#5B21B6','#0E7490','#C46A10','#065F46','#6B21A8','#9A3412','#1E40AF','#15803D','#B45309','#B91C1C','#7C3AED'];
+
+function getFreq(list) {
+  const f = {};
+  list.forEach(r => {
+    (r.texto || '').toLowerCase().replace(/[¿?¡!.,;:()'"\-]/g, ' ').split(/\s+/)
+      .filter(w => w.length > 2 && !STOPS.has(w))
+      .forEach(w => { f[w] = (f[w]||0) + 1; });
+  });
+  return Object.entries(f).sort((a,b) => b[1]-a[1]).slice(0, 45);
+}
+
+function renderWordCloud() {
+  const wce = document.getElementById('wc-empty');
+  const wcc = document.getElementById('chip-cloud');
+  const freq = respuestas.length > 0 ? getFreq(respuestas) : [];
+  if (freq.length === 0) { wce.classList.remove('hidden'); wcc.classList.add('hidden'); return; }
+  wce.classList.add('hidden'); wcc.classList.remove('hidden');
+  const maxF = freq[0][1];
+  wcc.innerHTML = '';
+  [...freq].sort(() => Math.random()-.5).forEach(([word,count],i) => {
+    const r = count/maxF;
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = word;
+    chip.title = '"' + word + '" — ' + count + ' mención' + (count>1?'es':'');
+    const color = WC_COLORS[i % WC_COLORS.length];
+    chip.style.cssText = 'font-size:' + (11+Math.round(r*28)) + 'px;padding:' + (r>.6?'6px 14px':r>.3?'5px 11px':'4px 9px') + ';opacity:' + (.55+r*.45) + ';color:' + color + ';background:' + color + '18;border-color:' + color + '30;';
+    wcc.appendChild(chip);
+  });
+}
+
+// ═══════════════════════════════════════════
+// RESPONSES LIST
+// ═══════════════════════════════════════════
+function renderResponsesList() {
+  const el = document.getElementById('responses-list');
+  if (respuestas.length === 0) {
+    el.innerHTML = '<div class="banner banner-info"><span>&#x2139;</span><span>No hay respuestas registradas aún.</span></div>';
+    return;
+  }
+  el.innerHTML = respuestas.map(r => {
+    const d = new Date(r.created_at);
+    const ts = d.toLocaleDateString('es-NI') + ' · ' + d.toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'});
+    const nombre = r.tiendas ? r.tiendas.nombre : '';
+    return '<div class="response-item"><div class="response-store">' + esc(r.tienda_codigo) +
+      '</div><div><div class="response-text">' + esc(r.texto) +
+      '</div><div class="response-time">' + esc(nombre) + ' · ' + ts + '</div></div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD — Analytics
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  renderTopWords();
+  renderSentiment();
+  renderAvgLength();
+  renderClusters();
+  renderMissingStores();
+}
+
+function renderTopWords() {
+  const freq = getFreq(respuestas);
+  const el = document.getElementById('dash-top-words');
+  if (freq.length === 0) { el.innerHTML = '<span style="color:var(--text-hint);font-size:12px">Sin datos</span>'; return; }
+  const maxF = freq[0][1];
+  el.innerHTML = freq.slice(0, 10).map(([w,c], i) => {
+    const pct = Math.round((c/maxF)*100);
+    const color = WC_COLORS[i % WC_COLORS.length];
+    return '<div class="insight-bar">' +
+      '<div class="insight-bar-label">' + esc(w) + '</div>' +
+      '<div class="insight-bar-track"><div class="insight-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '<div class="insight-bar-count">' + c + '</div></div>';
+  }).join('');
+}
+
+function renderSentiment() {
+  const el = document.getElementById('dash-sentiment');
+  if (respuestas.length === 0) { el.innerHTML = '<span style="color:var(--text-hint);font-size:12px">Sin datos</span>'; return; }
+
+  const positivas = ['comprensivos','pacientes','compraron','compran','esperan','confían','bien','positivo','contentos','emocionados','animados','buena','tranquilos','aceptaron','normal'];
+  const negativas = ['molestos','molestia','quejaron','enojados','frustrados','mal','negativo','decepcionados','no compraron','rechazo','descontentos','enojo'];
+  const neutrales = ['preguntan','preguntaban','curiosos','indiferentes','cuándo','fecha','cuándo llega'];
+
+  let pos = 0, neg = 0, neu = 0;
+  respuestas.forEach(r => {
+    const t = (r.texto || '').toLowerCase();
+    const hasPos = positivas.some(p => t.includes(p));
+    const hasNeg = negativas.some(n => t.includes(n));
+    if (hasPos && !hasNeg) pos++;
+    else if (hasNeg && !hasPos) neg++;
+    else if (hasPos && hasNeg) neu++;
+    else neu++;
+  });
+
+  const total = respuestas.length;
+  const pp = Math.round((pos/total)*100);
+  const np = Math.round((neg/total)*100);
+  const nup = 100 - pp - np;
+
+  el.innerHTML =
+    '<div style="display:flex;gap:2px;height:24px;border-radius:6px;overflow:hidden;margin-bottom:8px">' +
+      (pp > 0 ? '<div style="width:'+pp+'%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600">'+pp+'%</div>' : '') +
+      (nup > 0 ? '<div style="width:'+nup+'%;background:var(--amber-mid);display:flex;align-items:center;justify-content:center;color:var(--amber);font-size:10px;font-weight:600">'+nup+'%</div>' : '') +
+      (np > 0 ? '<div style="width:'+np+'%;background:var(--red);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600">'+np+'%</div>' : '') +
+    '</div>' +
+    '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-secondary)">' +
+      '<span>&#x1F7E2; Positivo: ' + pos + '</span>' +
+      '<span>&#x1F7E1; Neutro: ' + neu + '</span>' +
+      '<span>&#x1F534; Negativo: ' + neg + '</span>' +
+    '</div>';
+}
+
+function renderAvgLength() {
+  const el = document.getElementById('dash-avg-length');
+  if (respuestas.length === 0) { el.innerHTML = '<span style="color:var(--text-hint);font-size:12px">Sin datos</span>'; return; }
+  const avg = Math.round(respuestas.reduce((s,r) => s + (r.texto||'').length, 0) / respuestas.length);
+  const words = Math.round(respuestas.reduce((s,r) => s + (r.texto||'').split(/\s+/).length, 0) / respuestas.length);
+  el.innerHTML = '<div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--blue)">' + avg + '</div>' +
+    '<div style="font-size:11px;color:var(--text-secondary)">caracteres promedio (~' + words + ' palabras)</div>';
+}
+
+function renderClusters() {
+  const el = document.getElementById('dash-clusters');
+  if (respuestas.length === 0) { el.innerHTML = '<span style="color:var(--text-hint);font-size:12px">Sin datos</span>'; return; }
+
+  // Simple keyword-based clustering
+  const clusters = {};
+  const clusterDefs = [
+    { key: 'comprensivos', keywords: ['comprensivos','comprensivo','pacientes','paciente','tranquilos','aceptaron','normal'], color: 'var(--green)', bg: 'var(--green-light)' },
+    { key: 'compraron_esperan', keywords: ['compraron','compran','esperan','espera','a la espera','compraron igual'], color: 'var(--blue)', bg: 'var(--blue-light)' },
+    { key: 'molestos', keywords: ['molestos','molestia','molesto','enojados','frustrados','quejaron','queja'], color: 'var(--red)', bg: 'var(--red-light)' },
+    { key: 'preguntan_fecha', keywords: ['preguntan','preguntaban','cuándo','cuando llega','fecha','cuándo llega'], color: 'var(--purple)', bg: 'var(--purple-light)' },
+    { key: 'no_compraron', keywords: ['no compraron','no compran','no quisieron','rechazaron'], color: 'var(--amber)', bg: 'var(--amber-light)' },
+  ];
+
+  const labels = {
+    'comprensivos': 'Comprensivos / Pacientes',
+    'compraron_esperan': 'Compraron y esperan',
+    'molestos': 'Molestos / Frustrados',
+    'preguntan_fecha': 'Preguntan por fecha',
+    'no_compraron': 'No compraron',
+    'otros': 'Otros / Mixto'
+  };
+  const clusterColors = {
+    'comprensivos': { color: 'var(--green)', bg: 'var(--green-light)' },
+    'compraron_esperan': { color: 'var(--blue)', bg: 'var(--blue-light)' },
+    'molestos': { color: 'var(--red)', bg: 'var(--red-light)' },
+    'preguntan_fecha': { color: 'var(--purple)', bg: 'var(--purple-light)' },
+    'no_compraron': { color: 'var(--amber)', bg: 'var(--amber-light)' },
+    'otros': { color: 'var(--text-secondary)', bg: 'var(--surface-alt)' }
+  };
+
+  respuestas.forEach(r => {
+    const t = (r.texto || '').toLowerCase();
+    let matched = false;
+    for (const cd of clusterDefs) {
+      if (cd.keywords.some(k => t.includes(k))) {
+        clusters[cd.key] = (clusters[cd.key] || 0) + 1;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) clusters['otros'] = (clusters['otros'] || 0) + 1;
+  });
+
+  const sorted = Object.entries(clusters).sort((a,b) => b[1]-a[1]);
+  el.innerHTML = sorted.map(([k, count]) => {
+    const cc = clusterColors[k] || clusterColors['otros'];
+    const pct = Math.round((count / respuestas.length) * 100);
+    return '<div class="cluster-tag" style="background:' + cc.bg + ';color:' + cc.color + ';border:1px solid ' + cc.color + '22">' +
+      (labels[k]||k) + ' <strong>' + count + '</strong> (' + pct + '%)</div>';
+  }).join('');
+}
+
+function renderMissingStores() {
+  const el = document.getElementById('dash-missing-stores');
+  const answered = new Set(respuestas.map(r => r.tienda_codigo));
+  const missing = tiendas.filter(t => !answered.has(t.codigo));
+
+  if (missing.length === 0) {
+    el.innerHTML = '<div class="banner banner-success" style="margin-top:0"><span>&#x2705;</span><span>¡Todas las tiendas han respondido!</span></div>';
+    return;
+  }
+
+  el.innerHTML = '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">' + missing.length + ' tiendas pendientes</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
+    missing.map(t => '<span style="font-size:10px;font-family:\'DM Mono\',monospace;background:var(--red-light);color:var(--red);padding:2px 6px;border-radius:4px;border:1px solid var(--red-mid)">' + t.codigo + '</span>').join('') +
+    '</div>';
+}
+
+// ═══════════════════════════════════════════
+// CHANGE QUESTION FLOW
+// ═══════════════════════════════════════════
+function askChangeQuestion() {
+  const newQ = document.getElementById('admin-question-edit').value.trim();
+  if (!newQ) { alert('La pregunta no puede estar vacía.'); return; }
+  if (encuestaActiva && newQ === encuestaActiva.pregunta) { alert('La pregunta es la misma.'); return; }
+  pendingNewQ = newQ;
+  document.getElementById('changeq-modal').classList.remove('hidden');
+}
+function cancelChangeQ() { document.getElementById('changeq-modal').classList.add('hidden'); pendingNewQ = ''; }
+
+async function confirmChangeQuestion() {
+  document.getElementById('changeq-modal').classList.add('hidden');
+  // Deactivate current
+  if (encuestaActiva) {
+    await sb.from('encuestas').update({ activa: false, closed_at: new Date().toISOString() }).eq('id', encuestaActiva.id);
+  }
+  // Create new
+  await sb.from('encuestas').insert({ pregunta: pendingNewQ, activa: true, sistema: 'managua' });
+  pendingNewQ = '';
+  await renderAdmin();
+  switchTab('dashboard');
+}
+
+async function downloadPDFthenChange() {
+  document.getElementById('changeq-modal').classList.add('hidden');
+  downloadPDF();
+  setTimeout(async () => {
+    if (encuestaActiva) {
+      await sb.from('encuestas').update({ activa: false, closed_at: new Date().toISOString() }).eq('id', encuestaActiva.id);
+    }
+    await sb.from('encuestas').insert({ pregunta: pendingNewQ, activa: true, sistema: 'managua' });
+    pendingNewQ = '';
+    await renderAdmin();
+    switchTab('dashboard');
+  }, 800);
+}
+
+// ═══════════════════════════════════════════
+// DOWNLOADS
+// ═══════════════════════════════════════════
+function downloadCSV() {
+  if (!respuestas.length) { alert('No hay respuestas para descargar.'); return; }
+  const rows = [['Código','Tienda','Respuesta','Fecha y hora'], ...respuestas.map(r => {
+    const nombre = r.tiendas ? r.tiendas.nombre : '';
+    return [r.tienda_codigo, nombre, r.texto, new Date(r.created_at).toLocaleString('es-NI')];
+  })];
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  triggerDL(URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'})), 'respuestas_escucha_ampm.csv');
+}
+
+function downloadCloudImage() {
+  const freq = getFreq(respuestas);
+  if (!freq.length) { alert('No hay palabras para generar imagen.'); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 520;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,900,520);
+  ctx.fillStyle = '#1B3A6B'; ctx.fillRect(0,0,900,52);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 15px Arial,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Escucha AMPM · Nube de palabras — ' + new Date().toLocaleDateString('es-NI'), 450, 26);
+  const maxF = freq[0][1];
+  const shuffled = [...freq].sort(() => Math.random()-.5);
+  const cols = 6, cellW = 145, cellH = 72, sx = 20, sy = 68;
+  shuffled.forEach(([word,count],i) => {
+    const r = count/maxF, size = Math.round(13+r*26), color = WC_COLORS[i%WC_COLORS.length];
+    const col = i%cols, row = Math.floor(i/cols);
+    const x = sx+col*cellW+cellW/2, y = sy+row*cellH+cellH/2;
+    if(y > canvas.height-20) return;
+    ctx.font = 'bold '+size+'px Arial,sans-serif';
+    ctx.fillStyle = color; ctx.globalAlpha = .55+r*.45;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(word,x,y);
+  });
+  ctx.globalAlpha = 1;
+  canvas.toBlob(b => triggerDL(URL.createObjectURL(b), 'nube_palabras_ampm.png'));
+}
+
+function downloadPDF() {
+  const today = new Date().toLocaleDateString('es-NI');
+  const total = respuestas.length;
+  const pct = totalStores > 0 ? Math.round((total/totalStores)*100) : 0;
+  const freq = getFreq(respuestas);
+
+  let wcImgTag = "<p style='color:#aaa;font-size:11px'>Sin respuestas aún.</p>";
+  if (freq.length > 0) {
+    const wc = document.createElement('canvas');
+    wc.width = 900; wc.height = 260;
+    const ctx = wc.getContext('2d');
+    ctx.fillStyle = '#F5F4F0'; ctx.fillRect(0,0,900,260);
+    const maxF = freq[0][1];
+    const shuffled = [...freq].sort(() => Math.random()-.5);
+    const cols = 7, cW = 126, cH = 62, sx = 10, sy = 12;
+    shuffled.forEach(([word,count],i) => {
+      const r = count/maxF, sz = Math.round(11+r*26), color = WC_COLORS[i%WC_COLORS.length];
+      const col = i%cols, row = Math.floor(i/cols);
+      const x = sx+col*cW+cW/2, y = sy+row*cH+cH/2;
+      if(y > wc.height-8) return;
+      ctx.font = 'bold '+sz+'px Arial,sans-serif';
+      ctx.fillStyle = color; ctx.globalAlpha = .5+r*.5;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(word,x,y);
+    });
+    ctx.globalAlpha = 1;
+    wcImgTag = '<img src="'+wc.toDataURL('image/png')+'" style="width:100%;border-radius:8px">';
+  }
+
+  const fs = total > 70 ? '7.5px' : total > 50 ? '8.5px' : total > 35 ? '9.5px' : '10.5px';
+  const rowPad = total > 70 ? '2px 6px' : total > 50 ? '3px 6px' : '4px 8px';
+  const rowsHtml = respuestas.map((r,i) => {
+    const nombre = r.tiendas ? r.tiendas.nombre : '';
+    const ts = new Date(r.created_at).toLocaleString('es-NI',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const bg = i%2===0 ? '#F8F9FB' : '#fff';
+    return '<tr style="background:'+bg+'"><td style="padding:'+rowPad+';font-size:'+fs+';font-weight:700;color:#1B3A6B;white-space:nowrap;border-bottom:1px solid #eee">'+esc(r.tienda_codigo)+'</td><td style="padding:'+rowPad+';font-size:'+fs+';color:#333;border-bottom:1px solid #eee">'+esc(nombre)+'</td><td style="padding:'+rowPad+';font-size:'+fs+';color:#1A1917;border-bottom:1px solid #eee">'+esc(r.texto)+'</td><td style="padding:'+rowPad+';font-size:'+fs+';color:#999;white-space:nowrap;border-bottom:1px solid #eee">'+ts+'</td></tr>';
+  }).join('');
+
+  const pregunta = encuestaActiva ? esc(encuestaActiva.pregunta) : '';
+
+  const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Escucha AMPM — '+today+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1A1917}@page{size:A4;margin:0}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{page-break-after:always;break-after:always}.page:last-child{page-break-after:avoid;break-after:avoid}}.page{width:210mm;padding:0;overflow:hidden}.p1-hero{background:#E07B1A;padding:18px 20px 14px;color:#fff}.p1-hero h1{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:3px}.p1-hero .sub{font-size:10px;opacity:.8;letter-spacing:.03em}.p1-body{padding:14px 20px 14px}.sec-head{background:#1B3A6B;color:#fff;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-bottom:8px}.q-box{background:#F5F4F0;border-left:4px solid #E07B1A;border-radius:4px;padding:10px 14px;font-size:11px;line-height:1.6;color:#1A1917;margin-bottom:14px}.stats-row{display:flex;gap:10px;margin-bottom:14px}.stat-box{flex:1;border:1.5px solid #1B3A6B;border-radius:8px;padding:10px 6px;text-align:center}.stat-v{font-size:26px;font-weight:800;color:#1B3A6B;line-height:1}.stat-l{font-size:8px;color:#888;margin-top:3px}.wc-box{background:#F5F4F0;border-radius:8px;padding:10px;margin-bottom:0}.page-footer{background:#1B3A6B;color:rgba(255,255,255,.6);font-size:7px;text-align:center;padding:5px;margin-top:14px}.p2-hero{background:#E07B1A;padding:10px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center}.p2-hero span{font-size:11px;font-weight:700}.p2-hero small{font-size:9px;opacity:.8}.p2-subhead{background:#1B3A6B;color:#fff;font-size:8.5px;font-weight:700;padding:5px 20px;letter-spacing:.04em}.p2-table-wrap{padding:8px 20px 10px}table{width:100%;border-collapse:collapse}thead th{background:#1B3A6B;color:#fff;font-size:8.5px;font-weight:700;padding:5px 8px;text-align:left;letter-spacing:.03em}</style></head><body>' +
+    '<div class="page"><div class="p1-hero"><h1>Escucha AMPM</h1><div class="sub">ENCUESTA ÁLBUM PANINI &nbsp;·&nbsp; v2.0 &nbsp;·&nbsp; '+today+'</div></div><div class="p1-body"><div class="sec-head">Pregunta activa</div><div class="q-box">'+pregunta+'</div><div class="sec-head">Estadísticas de participación</div><div class="stats-row"><div class="stat-box"><div class="stat-v">'+total+'</div><div class="stat-l">Respuestas recibidas</div></div><div class="stat-box"><div class="stat-v">'+totalStores+'</div><div class="stat-l">Tiendas activas</div></div><div class="stat-box"><div class="stat-v">'+pct+'%</div><div class="stat-l">Participación</div></div></div><div class="sec-head">Palabras más frecuentes</div><div class="wc-box">'+wcImgTag+'</div></div><div class="page-footer">Página 1 de 2 &nbsp;·&nbsp; Álbum Panini · Managua — AMPM Nicaragua</div></div>' +
+    '<div class="page"><div class="p2-hero"><span>Escucha AMPM — Detalle de respuestas</span><small>'+today+'</small></div><div class="p2-subhead">RESPUESTAS RECIBIDAS — '+total+' de '+totalStores+' tiendas &nbsp;·&nbsp; '+pct+'% de participación</div><div class="p2-table-wrap">' +
+    (total === 0 ? '<p style="color:#aaa;font-size:11px;padding:20px 0">No hay respuestas registradas aún.</p>' :
+    '<table><thead><tr><th style="width:12%">Código</th><th style="width:22%">Tienda</th><th style="width:50%">Respuesta del GT</th><th style="width:16%">Fecha y hora</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>') +
+    '</div><div class="page-footer">Página 2 de 2 &nbsp;·&nbsp; Álbum Panini · Managua — AMPM Nicaragua</div></div>' +
+    '<script>window.onload=function(){window.print()}<\/script></body></html>';
+
+  const w = window.open('','_blank','width=900,height=700');
+  if (!w) { alert('El navegador bloqueó la ventana emergente. Por favor permite pop-ups e intenta de nuevo.'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function triggerDL(url, name) {
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>

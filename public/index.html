@@ -951,17 +951,18 @@ function downloadPDF() {
   const pct = totalStores > 0 ? Math.round((total/totalStores)*100) : 0;
   const freq = getFreq(respuestas);
 
+  // ── GENERATE WORD CLOUD IMAGE ──
   let wcImgTag = "<p style='color:#aaa;font-size:11px'>Sin respuestas aún.</p>";
   if (freq.length > 0) {
     const wc = document.createElement('canvas');
-    wc.width = 900; wc.height = 260;
+    wc.width = 900; wc.height = 200;
     const ctx = wc.getContext('2d');
-    ctx.fillStyle = '#F5F4F0'; ctx.fillRect(0,0,900,260);
+    ctx.fillStyle = '#F5F4F0'; ctx.fillRect(0,0,900,200);
     const maxF = freq[0][1];
     const shuffled = [...freq].sort(() => Math.random()-.5);
-    const cols = 7, cW = 126, cH = 62, sx = 10, sy = 12;
+    const cols = 7, cW = 126, cH = 50, sx = 10, sy = 8;
     shuffled.forEach(([word,count],i) => {
-      const r = count/maxF, sz = Math.round(11+r*26), color = WC_COLORS[i%WC_COLORS.length];
+      const r = count/maxF, sz = Math.round(10+r*22), color = WC_COLORS[i%WC_COLORS.length];
       const col = i%cols, row = Math.floor(i/cols);
       const x = sx+col*cW+cW/2, y = sy+row*cH+cH/2;
       if(y > wc.height-8) return;
@@ -971,9 +972,58 @@ function downloadPDF() {
       ctx.fillText(word,x,y);
     });
     ctx.globalAlpha = 1;
-    wcImgTag = '<img src="'+wc.toDataURL('image/png')+'" style="width:100%;border-radius:8px">';
+    wcImgTag = '<img src="'+wc.toDataURL('image/png')+'" style="width:100%;border-radius:6px">';
   }
 
+  // ── EXECUTIVE SUMMARY: Cluster analysis ──
+  const positivas = ['comprensivos','comprensivo','pacientes','paciente','compraron','compran','esperan','espera','emocionados','emoción','contentos','satisfechos','bien','positivo','animados','buena','tranquilos','aceptaron','normal','compraron igual','compresivos','flexibles','pasivos','interés','interesados','entusiasmo'];
+  const negativas = ['molestos','molestia','molesto','enojados','frustrados','mal','negativo','decepcionados','no compraron','rechazo','descontentos','enojo','disgusto','inconformes','inconforme','desilusión','insatisfecho','renuente','renuentes','incomodidad','engaño','tristeza','tristes'];
+  const esperan_kw = ['espera','esperan','esperando','a la espera','pendiente','pendientes','contactos','llamar','llamamos','avisarles'];
+  const nocompran_kw = ['no compran','no compraron','no comprar','no quisieron','se retiran','se van','se fueron','no lo compran','no quieren comprar'];
+  const album_kw = ['álbum','album','albunes','álbumes'];
+
+  let posCount = 0, negCount = 0, neuCount = 0;
+  let esperanCount = 0, noCompranCount = 0, albumPregCount = 0;
+  respuestas.forEach(r => {
+    const t = (r.texto || '').toLowerCase();
+    const hasPos = positivas.some(p => t.includes(p));
+    const hasNeg = negativas.some(n => t.includes(n));
+    if (hasPos && !hasNeg) posCount++;
+    else if (hasNeg && !hasPos) negCount++;
+    else neuCount++;
+    if (esperan_kw.some(k => t.includes(k))) esperanCount++;
+    if (nocompran_kw.some(k => t.includes(k))) noCompranCount++;
+    if (album_kw.some(k => t.includes(k))) albumPregCount++;
+  });
+
+  const posPct = Math.round((posCount/total)*100) || 0;
+  const negPct = Math.round((negCount/total)*100) || 0;
+  const neuPct = total > 0 ? 100 - posPct - negPct : 0;
+
+  // Detect pasta dura mentions
+  let pastaDuraCount = 0;
+  respuestas.forEach(r => { if ((r.texto||'').toLowerCase().match(/pasta\s*(dura|gruesa|suave)/)) pastaDuraCount++; });
+
+  // Build summary bullets
+  const summaryBullets = [];
+  if (esperanCount > 0) summaryBullets.push('<b>' + esperanCount + ' tiendas (' + Math.round(esperanCount/total*100) + '%)</b> reportan que los clientes compraron stickers y están a la espera del álbum.');
+  if (noCompranCount > 0) summaryBullets.push('<b>' + noCompranCount + ' tiendas (' + Math.round(noCompranCount/total*100) + '%)</b> reportan clientes que decidieron no comprar hasta tener el álbum disponible.');
+  if (albumPregCount > 0) summaryBullets.push('<b>' + albumPregCount + ' tiendas (' + Math.round(albumPregCount/total*100) + '%)</b> mencionan que los clientes preguntan por la fecha de llegada del álbum.');
+  if (negCount > 0) summaryBullets.push('<b>' + negCount + ' tiendas (' + negPct + '%)</b> reportan molestia o frustración de los clientes.');
+  if (pastaDuraCount > 0) summaryBullets.push('<b>' + pastaDuraCount + ' tiendas</b> mencionan demanda por el álbum de <b>Pasta Dura</b>.');
+  const summaryHtml = summaryBullets.map(b => '<div style="padding:6px 0 6px 14px;border-left:3px solid #E07B1A;margin-bottom:8px;font-size:11px;line-height:1.6;color:#333">' + b + '</div>').join('');
+
+  // Sentiment bar
+  const sentBar = '<div style="display:flex;gap:2px;height:22px;border-radius:4px;overflow:hidden;margin:8px 0">' +
+    (posPct > 0 ? '<div style="width:'+posPct+'%;background:#166534;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+posPct+'% Positivo</div>' : '') +
+    (neuPct > 0 ? '<div style="width:'+neuPct+'%;background:#FCD34D;color:#92400E;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+neuPct+'% Neutro</div>' : '') +
+    (negPct > 0 ? '<div style="width:'+negPct+'%;background:#991B1B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+negPct+'% Negativo</div>' : '') +
+    '</div>';
+
+  // Top words compact
+  const topWordsHtml = freq.slice(0,12).map(([w,c]) => '<span style="display:inline-block;background:#EEF2FF;color:#1B3A6B;border:1px solid #C7D3F8;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;margin:3px 3px">' + esc(w) + ' (' + c + ')</span>').join('');
+
+  // ── DETAIL TABLE ──
   const fs = total > 70 ? '7.5px' : total > 50 ? '8.5px' : total > 35 ? '9.5px' : '10.5px';
   const rowPad = total > 70 ? '2px 6px' : total > 50 ? '3px 6px' : '4px 8px';
   const rowsHtml = respuestas.map((r,i) => {
@@ -985,12 +1035,24 @@ function downloadPDF() {
 
   const pregunta = encuestaActiva ? esc(encuestaActiva.pregunta) : '';
 
-  const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Escucha AMPM — '+today+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1A1917}@page{size:A4;margin:0}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{page-break-after:always;break-after:always}.page:last-child{page-break-after:avoid;break-after:avoid}}.page{width:210mm;padding:0;overflow:hidden}.p1-hero{background:#E07B1A;padding:18px 20px 14px;color:#fff}.p1-hero h1{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:3px}.p1-hero .sub{font-size:10px;opacity:.8;letter-spacing:.03em}.p1-body{padding:14px 20px 14px}.sec-head{background:#1B3A6B;color:#fff;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-bottom:8px}.q-box{background:#F5F4F0;border-left:4px solid #E07B1A;border-radius:4px;padding:10px 14px;font-size:11px;line-height:1.6;color:#1A1917;margin-bottom:14px}.stats-row{display:flex;gap:10px;margin-bottom:14px}.stat-box{flex:1;border:1.5px solid #1B3A6B;border-radius:8px;padding:10px 6px;text-align:center}.stat-v{font-size:26px;font-weight:800;color:#1B3A6B;line-height:1}.stat-l{font-size:8px;color:#888;margin-top:3px}.wc-box{background:#F5F4F0;border-radius:8px;padding:10px;margin-bottom:0}.page-footer{background:#1B3A6B;color:rgba(255,255,255,.6);font-size:7px;text-align:center;padding:5px;margin-top:14px}.p2-hero{background:#E07B1A;padding:10px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center}.p2-hero span{font-size:11px;font-weight:700}.p2-hero small{font-size:9px;opacity:.8}.p2-subhead{background:#1B3A6B;color:#fff;font-size:8.5px;font-weight:700;padding:5px 20px;letter-spacing:.04em}.p2-table-wrap{padding:8px 20px 10px}table{width:100%;border-collapse:collapse}thead th{background:#1B3A6B;color:#fff;font-size:8.5px;font-weight:700;padding:5px 8px;text-align:left;letter-spacing:.03em}</style></head><body>' +
-    '<div class="page"><div class="p1-hero"><h1>Escucha AMPM</h1><div class="sub">ENCUESTA ÁLBUM PANINI &nbsp;·&nbsp; v2.0 &nbsp;·&nbsp; '+today+'</div></div><div class="p1-body"><div class="sec-head">Pregunta activa</div><div class="q-box">'+pregunta+'</div><div class="sec-head">Estadísticas de participación</div><div class="stats-row"><div class="stat-box"><div class="stat-v">'+total+'</div><div class="stat-l">Respuestas recibidas</div></div><div class="stat-box"><div class="stat-v">'+totalStores+'</div><div class="stat-l">Tiendas activas</div></div><div class="stat-box"><div class="stat-v">'+pct+'%</div><div class="stat-l">Participación</div></div></div><div class="sec-head">Palabras más frecuentes</div><div class="wc-box">'+wcImgTag+'</div></div><div class="page-footer">Página 1 de 2 &nbsp;·&nbsp; Álbum Panini · Managua — AMPM Nicaragua</div></div>' +
-    '<div class="page"><div class="p2-hero"><span>Escucha AMPM — Detalle de respuestas</span><small>'+today+'</small></div><div class="p2-subhead">RESPUESTAS RECIBIDAS — '+total+' de '+totalStores+' tiendas &nbsp;·&nbsp; '+pct+'% de participación</div><div class="p2-table-wrap">' +
+  const html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Escucha AMPM Managua — Resumen Ejecutivo — '+today+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1A1917}@page{size:A4;margin:0}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{page-break-after:always;break-after:always}.page:last-child{page-break-after:avoid;break-after:avoid}}.page{width:210mm;padding:0;overflow:hidden}.p1-hero{background:#E07B1A;padding:18px 20px 14px;color:#fff}.p1-hero h1{font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:3px}.p1-hero .sub{font-size:10px;opacity:.8;letter-spacing:.03em}.p1-body{padding:14px 20px 14px}.sec-head{background:#1B3A6B;color:#fff;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:4px;margin-bottom:10px}.q-box{background:#F5F4F0;border-left:4px solid #E07B1A;border-radius:4px;padding:10px 14px;font-size:11px;line-height:1.6;color:#1A1917;margin-bottom:14px}.stats-row{display:flex;gap:10px;margin-bottom:14px}.stat-box{flex:1;border:1.5px solid #1B3A6B;border-radius:8px;padding:10px 6px;text-align:center}.stat-v{font-size:28px;font-weight:800;color:#1B3A6B;line-height:1}.stat-l{font-size:9px;color:#888;margin-top:4px}.wc-box{background:#F5F4F0;border-radius:8px;padding:10px;margin-bottom:0}.page-footer{background:#1B3A6B;color:rgba(255,255,255,.6);font-size:7px;text-align:center;padding:5px;margin-top:10px}.p2-hero{background:#E07B1A;padding:10px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center}.p2-hero span{font-size:11px;font-weight:700}.p2-hero small{font-size:9px;opacity:.8}.p2-subhead{background:#1B3A6B;color:#fff;font-size:8.5px;font-weight:700;padding:5px 20px;letter-spacing:.04em}.p2-table-wrap{padding:8px 20px 10px}table{width:100%;border-collapse:collapse}thead th{background:#1B3A6B;color:#fff;font-size:8px;font-weight:700;padding:4px 6px;text-align:left;letter-spacing:.03em}</style></head><body>' +
+
+    // PAGE 1: EXECUTIVE SUMMARY
+    '<div class="page"><div class="p1-hero"><h1>Escucha AMPM Managua — Resumen Ejecutivo</h1><div class="sub">ÁLBUM PANINI · MANAGUA &nbsp;·&nbsp; v2.0 &nbsp;·&nbsp; '+today+'</div></div><div class="p1-body">' +
+    '<div class="sec-head">Pregunta activa</div><div class="q-box">'+pregunta+'</div>' +
+    '<div class="sec-head">Participación</div><div class="stats-row"><div class="stat-box"><div class="stat-v">'+total+'</div><div class="stat-l">Respuestas</div></div><div class="stat-box"><div class="stat-v">'+totalStores+'</div><div class="stat-l">Tiendas</div></div><div class="stat-box"><div class="stat-v">'+pct+'%</div><div class="stat-l">Cobertura</div></div></div>' +
+    '<div class="sec-head">Sentimiento general</div>' + sentBar +
+    '<div style="display:flex;gap:14px;font-size:10px;color:#666;margin-bottom:14px"><span>&#x1F7E2; Positivo: '+posCount+'</span><span>&#x1F7E1; Neutro: '+neuCount+'</span><span>&#x1F534; Negativo: '+negCount+'</span></div>' +
+    '<div class="sec-head">Hallazgos clave</div>' + summaryHtml +
+    '<div class="sec-head" style="margin-top:10px">Palabras más mencionadas</div><div style="margin-bottom:10px">' + topWordsHtml + '</div>' +
+    '<div class="sec-head" style="margin-top:6px">Nube de palabras</div><div class="wc-box">'+wcImgTag+'</div>' +
+    '</div><div class="page-footer">Página 1 de 2 &nbsp;·&nbsp; Resumen Ejecutivo · Álbum Panini Managua — AMPM Nicaragua</div></div>' +
+
+    // PAGE 2: DETAIL
+    '<div class="page"><div class="p2-hero"><span>Escucha AMPM Managua — Detalle de respuestas</span><small>'+today+'</small></div><div class="p2-subhead">RESPUESTAS RECIBIDAS — '+total+' de '+totalStores+' tiendas &nbsp;·&nbsp; '+pct+'% de participación</div><div class="p2-table-wrap">' +
     (total === 0 ? '<p style="color:#aaa;font-size:11px;padding:20px 0">No hay respuestas registradas aún.</p>' :
-    '<table><thead><tr><th style="width:12%">Código</th><th style="width:22%">Tienda</th><th style="width:50%">Respuesta del GT</th><th style="width:16%">Fecha y hora</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>') +
-    '</div><div class="page-footer">Página 2 de 2 &nbsp;·&nbsp; Álbum Panini · Managua — AMPM Nicaragua</div></div>' +
+    '<table><thead><tr><th style="width:10%">Código</th><th style="width:18%">Tienda</th><th style="width:56%">Respuesta del GT</th><th style="width:16%">Fecha</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>') +
+    '</div><div class="page-footer">Página 2 de 2 &nbsp;·&nbsp; Álbum Panini Managua — AMPM Nicaragua</div></div>' +
     '<script>window.onload=function(){window.print()}<\/script></body></html>';
 
   const w = window.open('','_blank','width=900,height=700');
